@@ -1,0 +1,26 @@
+# Next.js
+.next/
+out/
+node_modules/
+.env.local
+.env
+.env.*
+
+# Go
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Logs
+*.log
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.swp
