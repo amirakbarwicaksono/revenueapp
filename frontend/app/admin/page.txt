@@ -1,0 +1,193 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import ProtectedRoute from "../components/ProtectedRoute";
+import { useAuth } from "../context/AuthContext";
+
+type User = {
+    _id: string; // String ID extracted from MongoDB $oid
+    username: string;
+    password?: string;
+    staffname: string;
+    staffemail: string;
+    access?: string[];
+    keyword?: string[];
+};
+
+const AdminPage = () => {
+    const [users, setUsers] = useState<User[]>([]);
+    const [newUser, setNewUser] = useState<Partial<User>>({});
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+    const { access } = useAuth();
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch users");
+                }
+                const data = await response.json();
+
+                // Map data to extract $oid for _id
+                const formattedUsers = data.map((user: any) => ({
+                    ...user,
+                    _id: user._id?.$oid || user._id, // Handle $oid nesting
+                }));
+
+                setUsers(formattedUsers);
+                setError(null);
+            } catch (err) {
+                console.error(err);
+                setError("Failed to fetch users. Please try again later.");
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+    const handleAddUser = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/add`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newUser),
+            });
+            if (!response.ok) {
+                throw new Error("Failed to add user. Please check the input.");
+            }
+            const data = await response.json();
+
+            // Extract $oid for new user
+            const newUserWithId = {
+                ...data,
+                _id: data._id?.$oid || data._id,
+            };
+
+            setUsers([...users, newUserWithId]);
+            setNewUser({});
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to add user. Please try again later.");
+        }
+    };
+
+    const handleDeleteUser = async (userId: string) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/delete?id=${userId}`, {
+                method: "DELETE",
+            });
+            if (!response.ok) {
+                throw new Error("Failed to delete user.");
+            }
+            setUsers(users.filter(user => user._id !== userId));
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to delete user. Please try again later.");
+        }
+    };
+
+    const handleUpdateUser = async (userId: string, updatedUser: Partial<User>) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/update?id=${userId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedUser),
+            });
+            if (!response.ok) {
+                throw new Error("Failed to update user.");
+            }
+            const data = await response.json();
+
+            // Extract $oid for updated user
+            const updatedUserWithId = {
+                ...data,
+                _id: data._id?.$oid || data._id,
+            };
+
+            setUsers(users.map(user => (user._id === userId ? updatedUserWithId : user)));
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to update user. Please try again later.");
+        }
+    };
+
+    return (
+        <ProtectedRoute>
+            <div className="min-h-screen bg-black text-gray-200 p-4">
+                <h1 className="text-2xl font-bold mb-4">Admin Page</h1>
+                {error && <p className="text-red-500">{error}</p>}
+
+                <div className="mb-4">
+                    <h2 className="text-xl font-bold mb-2">Add New User</h2>
+                    <input
+                        type="text"
+                        placeholder="Username"
+                        value={newUser.username || ""}
+                        onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                        className="w-full p-2 mb-2 border border-gray-600 rounded bg-gray-800 text-gray-300"
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={newUser.password || ""}
+                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                        className="w-full p-2 mb-2 border border-gray-600 rounded bg-gray-800 text-gray-300"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Staff Name"
+                        value={newUser.staffname || ""}
+                        onChange={(e) => setNewUser({ ...newUser, staffname: e.target.value })}
+                        className="w-full p-2 mb-2 border border-gray-600 rounded bg-gray-800 text-gray-300"
+                    />
+                    <input
+                        type="email"
+                        placeholder="Staff Email"
+                        value={newUser.staffemail || ""}
+                        onChange={(e) => setNewUser({ ...newUser, staffemail: e.target.value })}
+                        className="w-full p-2 mb-2 border border-gray-600 rounded bg-gray-800 text-gray-300"
+                    />
+                    <button
+                        onClick={handleAddUser}
+                        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-500 transition"
+                    >
+                        Add User
+                    </button>
+                </div>
+
+                <div>
+                    <h2 className="text-xl font-bold mb-2">User List</h2>
+                    {users.map(user => (
+                        <div key={user._id} className="mb-4 p-4 bg-gray-900 rounded-lg shadow-md">
+                            <h3 className="text-lg font-bold">{user.username}</h3>
+                            <p>Staff Name: {user.staffname}</p>
+                            <p>Staff Email: {user.staffemail}</p>
+                            <p>Access: {user.access?.join(", ") || "No access"}</p>
+                            <p>Keywords: {user.keyword?.join(", ") || "No keywords"}</p>
+                            <button
+                                onClick={() => handleDeleteUser(user._id)}
+                                className="mt-2 bg-red-600 text-white py-1 px-2 rounded hover:bg-red-500 transition"
+                            >
+                                Delete
+                            </button>
+                            <button
+                                onClick={() => router.push(`/admin/edit/${user._id}`)}
+                                className="mt-2 ml-2 bg-yellow-600 text-white py-1 px-2 rounded hover:bg-yellow-500 transition"
+                            >
+                                Edit
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </ProtectedRoute>
+    );
+};
+
+export default AdminPage;

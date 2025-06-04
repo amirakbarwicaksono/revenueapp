@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Root Theme Variables */
+:root {
+  --background: #eeeeee; /* Dark mode background */
+  --foreground: #c3e6df; /* Dark mode text color */
+  --navbar-bg: #eeeeee; /* Dark mode Navbar background */
+  --navbar-text: #0b110e; /* Dark mode Navbar text color */
+  --primary-color: #fbfbfb;
+  --secondary-color: #b8100f;
+  --white-color: #0b110e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #eeeeee; /* Dark mode background */
+    --foreground: #c3e6df; /* Dark mode text color */
+    --navbar-bg: #eeeeee; /* Dark mode Navbar background */
+    --navbar-text: #0b110e; /* Dark mode Navbar text color */
+    --primary-color: #fbfbfb;
+    --secondary-color: #b8100f;
+    --white-color: #0b110e;
+  }
+}
+
+/* Global Styles */
+body {
+  color: var(--foreground);
+  background-color: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  padding-top: 4rem; /* Account for fixed Navbar height */
+  margin: 0;
+  line-height: 1.6;
+  min-height: 100vh; /* Ensure body spans full height */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar Styles */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4rem;
+  z-index: 10;
+  background-color: var(--navbar-bg);
+  color: var(--navbar-text);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+}
+
+/* Navbar Container */
+nav .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Main Content */
+main {
+  flex: 1; /* Allow main content to grow and fill the available space */
+  margin-top: 4rem; /* Push content below the fixed Navbar */
+  padding: 1rem;
+}
+
+/* Container Styling */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  background-color: var(--navbar-bg);
+}
+
+/* Button and Link Styles */
+button,
+a {
+  transition: all 0.3s ease;
+}
+
+button:hover,
+a:hover {
+  opacity: 0.8;
+}
+
+/* Utility Classes for Flex and Centering */
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+/* Footer Styles (if applicable) */
+footer {
+  background-color: var(--navbar-bg);
+  color: var(--navbar-text);
+  text-align: center;
+  padding: 1rem;
+  margin-top: auto; /* Push footer to the bottom */
+}
+
+
+/* Additional Global Styles */
+.bg-primary {
+  background-color: var(--primary-color);
+}
+
+.bg-secondary {
+  background-color: var(--secondary-color);
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.text-secondary {
+  color: var(--secondary-color);
+}
+
+.text-white {
+  color: var(--white-color);
+}

@@ -1,0 +1,320 @@
+//added button for dataSSR
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import SubpageGuard from "../../components/SubpageGuard";
+import ProtectedRoute from "../../components/ProtectedRoute";
+import "../../../styles/globals.css";
+import { FaFileDownload, FaPlay, FaStop, FaTable } from "react-icons/fa";
+
+export default function DtkofPage() {
+    const [vlookupMessage, setVlookupMessage] = useState("Ready to start...");
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [isDownloadEnabled, setIsDownloadEnabled] = useState(false);
+    const [eventSource, setEventSource] = useState<EventSource | null>(null);
+    const [showStopButton, setShowStopButton] = useState(false);
+    const [showStopExportButton, setShowStopExportButton] = useState(false);
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const startEventSource = () => {
+        if (!apiUrl) {
+            setVlookupMessage("API URL is not configured.");
+            setIsProcessing(false);
+            return;
+        }
+
+        const es = new EventSource(`${apiUrl}/lookupAndSave1`);
+        setEventSource(es);
+
+        es.onopen = () => {
+            console.log("SSE connection opened.");
+        };
+
+        es.onmessage = (event) => {
+            console.log("Raw SSE message:", event.data);
+            try {
+                const data = JSON.parse(event.data);
+                if (data.message) {
+                    setVlookupMessage(data.message);
+                    if (data.message.includes("Another process is already running")) {
+                        setShowStopButton(true);
+                        setIsProcessing(false);
+                        es.close();
+                        setEventSource(null);
+                    } else if (data.message.includes("Process aborted")) {
+                        setIsProcessing(false);
+                        es.close();
+                        setEventSource(null);
+                    }
+                } else {
+                    setVlookupMessage("Received unexpected message format.");
+                }
+            } catch (error) {
+                console.error("Error parsing SSE message:", error, event.data);
+                setVlookupMessage("Error processing server message.");
+                setIsProcessing(false);
+                setShowStopButton(false);
+                es.close();
+                setEventSource(null);
+            }
+        };
+
+        es.addEventListener("complete", () => {
+            setVlookupMessage("VLOOKUP process completed successfully!");
+            setIsProcessing(false);
+            setIsDownloadEnabled(true);
+            setShowStopButton(false);
+            es.close();
+            setEventSource(null);
+            console.log("SSE connection closed on completion.");
+        });
+
+        es.onerror = () => {
+            console.error("SSE connection error.");
+            setVlookupMessage("Connection lost or server error. Please try again.");
+            setIsProcessing(false);
+            setShowStopButton(false);
+            es.close();
+            setEventSource(null);
+        };
+    };
+
+    const handleVlookupProcess = () => {
+        if (isProcessing) return;
+
+        setVlookupMessage("Initializing VLOOKUP process...");
+        setIsProcessing(true);
+        setIsDownloadEnabled(false);
+        setShowStopButton(false);
+
+        try {
+            startEventSource();
+        } catch (error) {
+            console.error("VLOOKUP Error:", error);
+            setVlookupMessage("Unexpected error during VLOOKUP.");
+            setIsProcessing(false);
+            setShowStopButton(false);
+            if (eventSource) {
+                eventSource.close();
+                setEventSource(null);
+            }
+        }
+    };
+
+    const handleStopProcess = async () => {
+        if (!apiUrl) {
+            setVlookupMessage("API URL is not configured.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiUrl}/stopProcess`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                setVlookupMessage(`Failed to stop process: ${data.message || "Unknown error"}`);
+                return;
+            }
+
+            setVlookupMessage("Process stopped successfully. You can start a new process.");
+            setShowStopButton(false);
+            console.log("Process stopped successfully.");
+        } catch (error) {
+            console.error("Stop Process Error:", error);
+            setVlookupMessage("Error occurred while stopping the process.");
+        }
+    };
+
+    const handleStopExportProcess = async () => {
+        if (!apiUrl) {
+            setVlookupMessage("API URL is not configured.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiUrl}/stopExportProcess`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                setVlookupMessage(`Failed to stop export process: ${data.message || "Unknown error"}`);
+                return;
+            }
+
+            setVlookupMessage("Export process stopped successfully. You can try downloading again.");
+            setShowStopExportButton(false);
+            console.log("Export process stopped successfully.");
+        } catch (error) {
+            console.error("Stop Export Process Error:", error);
+            setVlookupMessage("Error occurred while stopping export process.");
+        }
+    };
+
+    const handleDownload = async () => {
+        if (!apiUrl) {
+            setVlookupMessage("API URL is not configured.");
+            return;
+        }
+
+        setIsDownloadEnabled(false);
+
+        try {
+            const response = await fetch(`${apiUrl}/exportCSV1`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                if (errorData.message && errorData.message.includes("Another export process is already running")) {
+                    setVlookupMessage(errorData.message);
+                    setShowStopExportButton(true);
+                    return;
+                }
+                setVlookupMessage(`Failed to download CSV: ${errorData.message || "Unknown error"}`);
+                return;
+            }
+
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = "SSRDataProcess.csv";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+
+            setVlookupMessage("CSV file downloaded successfully!");
+        } catch (error) {
+            console.error("Download Error:", error);
+            setVlookupMessage("Error occurred while downloading the CSV.");
+        }
+    };
+
+    const handleViewDataSSR = () => {
+        console.log("Current pathname:", pathname);
+        router.push("/dashboard/datassr", { scroll: false });
+    };
+
+    useEffect(() => {
+        console.log("DtkofPage mounted, current pathname:", pathname);
+        return () => {
+            if (eventSource) {
+                eventSource.close();
+                setEventSource(null);
+            }
+        };
+    }, [eventSource]);
+
+    return (
+        <ProtectedRoute>
+            <SubpageGuard requiredAccess="dtssr">
+                <div className="min-h-screen p-4 bg-background text-black">
+                    <header className="mb-6">
+                        <div className="flex items-center gap-4">
+                            <h1 className="text-xl font-bold">Data Offline By Team Revenue</h1>
+                            <button
+                                onClick={handleViewDataSSR}
+                                className="px-3 py-1.5 text-xs font-semibold text-gray-100 bg-blue-600 hover:bg-blue-700 rounded flex items-center"
+                            >
+                                <FaTable className="inline mr-1" /> View DataSSR
+                            </button>
+                        </div>
+                        <p className="font-mono text-xs mb-3">Data Offline Processing and CSV Export:</p>
+                        <ol className="list-decimal list-inside text-xs space-y-1">
+                            <li>Jika data Offline belum di-upload, silakan upload di menu <em>Data Offline</em>.</li>
+                            <li>
+                                Data Offline di-upload secara bergantian:
+                                <ul className="list-disc list-inside pl-4 space-y-1">
+                                    <li>Upload data Offline OD April 2025 di menu <em>Data Offline</em>.</li>
+                                    <li>
+                                        Setelah proses upload selesai, Masuk ke menu <em>App</em> lalu pilih{" "}
+                                        <em>DTSSR</em>.
+                                    </li>
+                                    <li>Klik <em>Start Process</em> untuk memulai proses eliminasi.</li>
+                                    <li>
+                                        Setelah proses selesai, tombol <strong>Download CSV</strong> akan aktif. Klik
+                                        untuk melihat hasil proses.
+                                    </li>
+                                    <li>
+                                        Data tersimpan di menu <em>DataSSR</em>. Klik <strong>View DataSSR</strong>{" "}
+                                        untuk melihatnya.
+                                    </li>
+                                    <li>Ulangi untuk setiap partisi (OD / ID / SL).</li>
+                                </ul>
+                            </li>
+                            <li>Urutan proses: Data Offline {'>'} App {'>'} DataSSR</li>
+                        </ol>
+                    </header>
+
+                    <div className="flex flex-wrap gap-5 justify-center">
+                        <div className="p-4 bg-white rounded shadow text-center w-56 hover:shadow-lg transform hover:scale-105 transition">
+                            <h2 className="text-sm font-semibold mb-3 text-black">SSR Process By Team Revenue</h2>
+                            <button
+                                onClick={handleVlookupProcess}
+                                disabled={isProcessing}
+                                className={`w-full px-3 py-1.5 text-xs font-semibold text-gray-100 rounded mb-2 ${
+                                    isProcessing ? "bg-red-400 cursor-not-allowed" : "bg-secondary hover:bg-secondary"
+                                }`}
+                            >
+                                {isProcessing ? "Processing..." : (
+                                    <>
+                                        <FaPlay className="inline mr-1" /> Start Process
+                                    </>
+                                )}
+                            </button>
+                            {showStopButton && (
+                                <button
+                                    onClick={handleStopProcess}
+                                    className="w-full px-3 py-1.5 text-xs font-semibold text-white rounded bg-secondary hover:bg-secondary mb-2"
+                                >
+                                    <FaStop className="inline mr-1" /> Stop Process
+                                </button>
+                            )}
+                            <p className="mt-3 text-xs text-black">{vlookupMessage}</p>
+                        </div>
+
+                        <div
+                            className={`p-4 bg-gray-50 rounded shadow text-center w-56 ${
+                                isDownloadEnabled
+                                    ? "hover:shadow-lg transform hover:scale-105 transition"
+                                    : "opacity-50 cursor-not-allowed"
+                            }`}
+                        >
+                            <h2 className="text-sm font-semibold mb-3 text-black">Download CSV SSR Process</h2>
+                            <button
+                                onClick={handleDownload}
+                                disabled={!isDownloadEnabled}
+                                className={`w-full px-3 py-1.5 text-xs font-semibold text-white rounded ${
+                                    isDownloadEnabled
+                                        ? "bg-secondary hover:bg-secondary"
+                                        : "bg-gray-400 cursor-not-allowed"
+                                }`}
+                            >
+                                {isDownloadEnabled ? (
+                                    <>
+                                        <FaFileDownload className="inline mr-1" /> Download CSV
+                                    </>
+                                ) : (
+                                    "Download Disabled"
+                                )}
+                            </button>
+                            {showStopExportButton && (
+                                <button
+                                    onClick={handleStopExportProcess}
+                                    className="mt-2 w-full px-3 py-1.5 text-xs font-semibold text-white rounded bg-secondary hover:bg-red-800"
+                                >
+                                    <FaStop className="inline mr-1" /> Stop Export
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </SubpageGuard>
+        </ProtectedRoute>
+    );
+}
