@@ -156,9 +156,32 @@ To help users visualize the UI, here are example screenshots of the upload and d
 
 ![Login](frontend/public/screenshots/login.png)
 
+### App Page
+
+![App](frontend/public/screenshots/app.png)
+
+### Home Page
+
+![Home](frontend/public/screenshots/fare.png)
+
+### SSR View Page
+
+![SSR](frontend/public/screenshots/ssrview.png)
+
+
+### SSR Process Page
+
+![SSR](frontend/public/screenshots/ssrprocess.png)
+
 ### SSR Dashboard
 
 ![SSR Dashboard](frontend/public/screenshots/dashboard.png)
+
+### Moblie View Dashboard
+
+![Mobile 1](frontend/public/screenshots/mobile1.png)
+
+![Mobile 2](frontend/public/screenshots/mobile2.png)
 
 ## License
 
