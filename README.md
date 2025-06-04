@@ -1,6 +1,10 @@
-RevenueApp
+# RevenueApp
+
 A full-stack web application for airline ticket data management, built with Next.js (frontend) and Go (backend with Gin and MongoDB). The app provides a responsive dashboard for viewing, filtering, and exporting SSR ticket data, along with CSV upload and data processing capabilities.
-Project Structure
+
+## Project Structure
+
+```
 revenueapp/
 ├── backend/
 │   ├── main.go
@@ -42,173 +46,157 @@ revenueapp/
 ├── .gitignore
 ├── README.md
 └── LICENSE
-
-Features
-
-Frontend (Next.js):
-Responsive UI with Tailwind CSS for desktop, tablet, and mobile.
-SSR data dashboard (DataSSRPage.tsx) with filtering (by issued date, country), searching (PNRR, Ticket Number), and CSV export.
-CSV upload interface (upload/page.tsx) for data ingestion.
-Role-based authentication with protected routes (ProtectedRoute.tsx, SubpageGuard.tsx).
-
-
-Backend (Go, Gin, MongoDB):
-REST API with endpoints for data retrieval (/getSSRData1), filter options (/getSSRFilterOptions), and CSV export (/exportFilteredCSV).
-CSV parsing, batch processing, and duplicate handling (uploadCSV.go).
-MongoDB aggregation pipelines for summaries (dashboardSummary.go).
-Server-Sent Events (SSE) for long-running tasks.
-
-
-Authentication: Role-based access control for upload and dashboard features.
-Data Processing: Validates and processes airline ticket data across collections (dashboard_ssr, DataFpr, DataFmr).
-Performance: MongoDB indexes on PNRR and TicketNumber for efficient searches.
-
-Getting Started
-Prerequisites
-
-Node.js: v18 or higher
-Go: v1.20 or higher
-MongoDB: Local instance or cloud (e.g., MongoDB Atlas)
-Git: For cloning the repository
-
-Backend Setup
-
-Clone the Repository:
-git clone https://github.com/amirakbarwicaksono/revenueapp.git
-cd revenueapp
-
-
-Configure Environment:
-
-Copy backend/.env.example to backend/.env:cp backend/.env.example backend/.env
-
-
-Edit backend/.env to set:MONGODB_URI=mongodb://localhost:27017
-MONGODB_DATABASE=revenueapp
-
-
-
-
-Set Up MongoDB Indexes:
-
-Connect to your MongoDB instance (e.g., using mongo or MongoDB Compass).
-Create indexes for the dashboard_ssr collection:use revenueapp
-db.dashboard_ssr.createIndex({ "PNRR": 1 });
-db.dashboard_ssr.createIndex({ "TicketNumber": 1 });
-
-
-
-
-Install Go Dependencies:
-cd backend
-go mod tidy
-
-
-Run the Backend Server:
-go run main.go
-
-
-The server runs at http://localhost:8080 (or your configured port).
-
-
-
-Frontend Setup
-
-Configure Environment:
-
-Copy frontend/.env.local.example to frontend/.env.local:cp frontend/.env.local.example frontend/.env.local
-
-
-Edit frontend/.env.local to set:NEXT_PUBLIC_API_URL=http://localhost:8080
-
-
-
-
-Install Node Dependencies:
-cd frontend
-npm install
-
-
-Run the Frontend App:
-npm run dev
-
-
-The app runs at http://localhost:3000.
-
-
-
-Usage
-
-Upload Data:
-Navigate to http://localhost:3000/upload.
-Select a collection (e.g., dashboard_ssr), date/month, and upload a CSV file.
-
-
-SSR Dashboard:
-Go to http://localhost:3000/DataSSRPage.
-Filter data by issued date or country, search by PNRR or Ticket Number, and export results as CSV.
-
-
-Protected Routes:
-Access to /upload and /DataSSRPage requires authentication with appropriate roles (configured via SubpageGuard.tsx).
-
-
-
-Customization
-
-Frontend:
-Modify collections in frontend/app/upload/page.tsx for new data types.
-Update filters or UI in frontend/app/DataSSRPage.tsx (e.g., re-enable airline filter by uncommenting the <select>).
-
-
-Backend:
-Add API endpoints in backend/routes/ and handlers in backend/handlers/ (e.g., extend getSSRData1.go).
-Update MongoDB schemas in backend/models/ (e.g., dashboard_ssr.go).
-
-
-Endpoint Notes:
-DataSSRPage.tsx uses /getSSRData1. If your backend uses /getSSRData, update the frontend:const response = await fetch(`${apiUrl}/getSSRData?${query}`);
-
-
-Commit the change:git add frontend/app/DataSSRPage.tsx
-git commit -m "Update API endpoint to /getSSRData"
-git push origin main
-
-
-
-
-
-
-
-Troubleshooting
-
-Frontend Folder Empty on GitHub:
-Ensure frontend/ contents are tracked:git status
-git add frontend/
-git commit -m "Add frontend files"
-git push origin main
-
-
-Check .gitignore for exclusions:cat .gitignore
-cat frontend/.gitignore
-
-
-Remove nested .git in frontend/:rm -rf frontend/.git
-
-
-
-
-API Endpoint Mismatch:
-Verify backend/handlers/getSSRData1.go exists. If using getSSRData.go, update DataSSRPage.tsx as above.
-
-
-MongoDB Errors:
-Ensure MONGODB_URI is correct and the database is running.
-Re-create indexes if searches are slow.
-
-
-
-License
-See LICENSE for details (e.g., MIT License, if applicable).
-
-For more details, see code comments, directory-specific READMEs, or contact the repository maintainer.
+```
+
+## Features
+
+- **Frontend (Next.js)**:
+  - Responsive UI with Tailwind CSS for desktop, tablet, and mobile.
+  - SSR data dashboard (`DataSSRPage.tsx`) with filtering (by issued date, country), searching (PNRR, Ticket Number), and CSV export.
+  - CSV upload interface (`upload/page.tsx`) for data ingestion.
+  - Role-based authentication with protected routes (`ProtectedRoute.tsx`, `SubpageGuard.tsx`).
+- **Backend (Go, Gin, MongoDB)**:
+  - REST API with endpoints for data retrieval (`/getSSRData1`), filter options (`/getSSRFilterOptions`), and CSV export (`/exportFilteredCSV`).
+  - CSV parsing, batch processing, and duplicate handling (`uploadCSV.go`).
+  - MongoDB aggregation pipelines for summaries (`dashboardSummary.go`).
+  - Server-Sent Events (SSE) for long-running tasks.
+- **Authentication**: Role-based access control for upload and dashboard features.
+- **Data Processing**: Validates and processes airline ticket data across collections (`dashboard_ssr`, `DataFpr`, `DataFmr`).
+- **Performance**: MongoDB indexes on `PNRR` and `TicketNumber` for efficient searches.
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js**: v18 or higher
+- **Go**: v1.20 or higher
+- **MongoDB**: Local instance or cloud (e.g., MongoDB Atlas)
+- **Git**: For cloning the repository
+
+### Backend Setup
+
+1. **Clone the Repository**:
+   ```sh
+   git clone https://github.com/amirakbarwicaksono/revenueapp.git
+   cd revenueapp
+   ```
+
+2. **Configure Environment**:
+   - Copy `backend/.env.example` to `backend/.env`:
+     ```sh
+     cp backend/.env.example backend/.env
+     ```
+   - Edit `backend/.env` to set:
+     ```env
+     MONGODB_URI=mongodb://localhost:27017
+     MONGODB_DATABASE=revenueapp
+     ```
+
+3. **Set Up MongoDB Indexes**:
+   - Connect to your MongoDB instance (e.g., using `mongo` or MongoDB Compass).
+   - Create indexes for the `dashboard_ssr` collection:
+     ```javascript
+     use revenueapp
+     db.dashboard_ssr.createIndex({ "PNRR": 1 });
+     db.dashboard_ssr.createIndex({ "TicketNumber": 1 });
+     ```
+
+4. **Install Go Dependencies**:
+   ```sh
+   cd backend
+   go mod tidy
+   ```
+
+5. **Run the Backend Server**:
+   ```sh
+   go run main.go
+   ```
+   - The server runs at `http://localhost:8080` (or your configured port).
+
+### Frontend Setup
+
+1. **Configure Environment**:
+   - Copy `frontend/.env.local.example` to `frontend/.env.local`:
+     ```sh
+     cp frontend/.env.local.example frontend/.env.local
+     ```
+   - Edit `frontend/.env.local` to set:
+     ```env
+     NEXT_PUBLIC_API_URL=http://localhost:8080
+     ```
+
+2. **Install Node Dependencies**:
+   ```sh
+   cd frontend
+   npm install
+   ```
+
+3. **Run the Frontend App**:
+   ```sh
+   npm run dev
+   ```
+   - The app runs at `http://localhost:3000`.
+
+## Usage
+
+- **Upload Data**:
+  - Navigate to `http://localhost:3000/upload`.
+  - Select a collection (e.g., `dashboard_ssr`), date/month, and upload a CSV file.
+- **SSR Dashboard**:
+  - Go to `http://localhost:3000/DataSSRPage`.
+  - Filter data by issued date or country, search by PNRR or Ticket Number, and export results as CSV.
+- **Protected Routes**:
+  - Access to `/upload` and `/DataSSRPage` requires authentication with appropriate roles (configured via `SubpageGuard.tsx`).
+
+## Customization
+
+- **Frontend**:
+  - Modify collections in `frontend/app/upload/page.tsx` for new data types.
+  - Update filters or UI in `frontend/app/DataSSRPage.tsx` (e.g., re-enable airline filter by uncommenting the `<select>`).
+- **Backend**:
+  - Add API endpoints in `backend/routes/` and handlers in `backend/handlers/` (e.g., extend `getSSRData1.go`).
+  - Update MongoDB schemas in `backend/models/` (e.g., `dashboard_ssr.go`).
+- **Endpoint Notes**:
+  - `DataSSRPage.tsx` uses `/getSSRData1`. If your backend uses `/getSSRData`, update the frontend:
+    ```tsx
+    const response = await fetch(`${apiUrl}/getSSRData?${query}`);
+    ```
+    - Commit the change:
+      ```sh
+      git add frontend/app/DataSSRPage.tsx
+      git commit -m "Update API endpoint to /getSSRData"
+      git push origin main
+      ```
+
+## Troubleshooting
+
+- **Frontend Folder Empty on GitHub**:
+  - Ensure `frontend/` contents are tracked:
+    ```sh
+    git status
+    git add frontend/
+    git commit -m "Add frontend files"
+    git push origin main
+    ```
+  - Check `.gitignore` for exclusions:
+    ```sh
+    cat .gitignore
+    cat frontend/.gitignore
+    ```
+  - Remove nested `.git` in `frontend/`:
+    ```sh
+    rm -rf frontend/.git
+    ```
+- **API Endpoint Mismatch**:
+  - Verify `backend/handlers/getSSRData1.go` exists. If using `getSSRData.go`, update `DataSSRPage.tsx` as above.
+- **MongoDB Errors**:
+  - Ensure `MONGODB_URI` is correct and the database is running.
+  - Re-create indexes if searches are slow.
+
+## License
+
+See [LICENSE](LICENSE) for details (e.g., MIT License, if applicable).
+
+---
+
+*For more details, see code comments, directory-specific READMEs, or contact the repository maintainer.*
