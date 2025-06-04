@@ -226,11 +226,11 @@ export default function DtkofPage() {
                         </div>
                         <p className="font-mono text-xs mb-3">Data Offline Processing and CSV Export:</p>
                         <ol className="list-decimal list-inside text-xs space-y-1">
-                            <li>Jika data Offline belum di-upload, silakan upload di menu <em>Data Offline</em>.</li>
+                            <li>Jika data Offline belum di-upload, silakan upload terlebih dahulu data Offline pada menu <em>Upload</em>.</li>
                             <li>
-                                Data Offline di-upload secara bergantian:
+                                Data Offline di-upload secara bergantian dengan contoh urutan sebagai berikut:
                                 <ul className="list-disc list-inside pl-4 space-y-1">
-                                    <li>Upload data Offline OD April 2025 di menu <em>Data Offline</em>.</li>
+                                    <li>Upload data Offline OD April 2025 melalui menu <em>Upload</em>.</li>
                                     <li>
                                         Setelah proses upload selesai, Masuk ke menu <em>App</em> lalu pilih{" "}
                                         <em>DTSSR</em>.
