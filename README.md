@@ -141,12 +141,12 @@ revenueapp/
 
 - **Upload Data**:
   - Navigate to `http://localhost:3000/upload`.
-  - Select a collection (e.g., `dashboard_ssr`), date/month, and upload a CSV file.
+  - Select a collection (e.g., `Flown Data or Offline Data`), date/month, and upload a CSV file.
 - **SSR Dashboard**:
-  - Go to `http://localhost:3000/DataSSRPage`.
+  - Go to `http://localhost:3000/dashboard/dtwbs`.
   - Filter data by issued date or country, search by PNRR or Ticket Number, and export results as CSV.
 - **Protected Routes**:
-  - Access to `/upload` and `/DataSSRPage` requires authentication with appropriate roles (configured via `SubpageGuard.tsx`).
+  - Access to `/upload` and `/dtwbs` requires authentication with appropriate roles (configured via `SubpageGuard.tsx`).
 
 ## Frontend Display
 
