@@ -148,50 +148,17 @@ revenueapp/
 - **Protected Routes**:
   - Access to `/upload` and `/DataSSRPage` requires authentication with appropriate roles (configured via `SubpageGuard.tsx`).
 
-## Customization
+## Frontend Display
 
-- **Frontend**:
-  - Modify collections in `frontend/app/upload/page.tsx` for new data types.
-  - Update filters or UI in `frontend/app/DataSSRPage.tsx` (e.g., re-enable airline filter by uncommenting the `<select>`).
-- **Backend**:
-  - Add API endpoints in `backend/routes/` and handlers in `backend/handlers/` (e.g., extend `getSSRData1.go`).
-  - Update MongoDB schemas in `backend/models/` (e.g., `dashboard_ssr.go`).
-- **Endpoint Notes**:
-  - `DataSSRPage.tsx` uses `/getSSRData1`. If your backend uses `/getSSRData`, update the frontend:
-    ```tsx
-    const response = await fetch(`${apiUrl}/getSSRData?${query}`);
-    ```
-    - Commit the change:
-      ```sh
-      git add frontend/app/DataSSRPage.tsx
-      git commit -m "Update API endpoint to /getSSRData"
-      git push origin main
-      ```
+To help users visualize the UI, here are example screenshots of the upload and dashboard pages. Place your images in `frontend/public/screenshots/` and reference them below:
 
-## Troubleshooting
+### Login Page
 
-- **Frontend Folder Empty on GitHub**:
-  - Ensure `frontend/` contents are tracked:
-    ```sh
-    git status
-    git add frontend/
-    git commit -m "Add frontend files"
-    git push origin main
-    ```
-  - Check `.gitignore` for exclusions:
-    ```sh
-    cat .gitignore
-    cat frontend/.gitignore
-    ```
-  - Remove nested `.git` in `frontend/`:
-    ```sh
-    rm -rf frontend/.git
-    ```
-- **API Endpoint Mismatch**:
-  - Verify `backend/handlers/getSSRData1.go` exists. If using `getSSRData.go`, update `DataSSRPage.tsx` as above.
-- **MongoDB Errors**:
-  - Ensure `MONGODB_URI` is correct and the database is running.
-  - Re-create indexes if searches are slow.
+![Login](frontend/public/screenshots/login.png)
+
+### SSR Dashboard
+
+![SSR Dashboard](frontend/public/screenshots/dashboard.png)
 
 ## License
 

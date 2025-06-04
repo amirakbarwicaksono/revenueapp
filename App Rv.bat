@@ -6,7 +6,7 @@ start "" cmd /k "cd /d D:\nextjs\my-orc-app\backend && echo Membuka folder backe
 
 REM Langkah 2: Buka Git Bash di folder frontend dan jalankan npm run dev
 echo Membuka Git Bash di folder frontend...
-"C:\Users\56127368.AD\AppData\Local\Programs\Git\bin\bash.exe" --cd="D:\nextjs\my-orc-app\frontend" -c "npm run dev"
+"C:\Program Files\Git\bin\bash.exe" --cd="D:\nextjs\my-orc-app\frontend" -c "npm run dev"
 
 pause
 REM Pause untuk memastikan pengguna dapat melihat hasil sebelum jendela CMD tertutup
