@@ -1,8 +1,11 @@
 @echo off
 REM Restore MongoDB dari backup dengan timestamp
 
+REM Pindah ke direktori MongoDB Tools
+cd "C:\Program Files\MongoDB\Tools\100\bin"
+
 REM Direktori backup
-set backupDir=E:\mongodb-backup
+set backupDir=D:\mongodb-backuprv
 
 REM Periksa apakah direktori backup ada
 if not exist "%backupDir%" (
@@ -29,7 +32,7 @@ if not exist "%backupDir%\%selectedBackup%" (
 
 REM Jalankan mongorestore
 echo Memulai proses restore dari folder: %backupDir%\%selectedBackup%
-mongorestore --db=lionb "%backupDir%\%selectedBackup%\lionp"
+mongorestore --db=lionb "%backupDir%\%selectedBackup%\liond"
 
 REM Pesan berhasil
 echo Restore completed successfully!
