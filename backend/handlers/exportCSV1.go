@@ -93,7 +93,7 @@ func ExportCSV1(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
 	defer cancel()
 
-	dashboardSsrCollection := db.GetCollection("dashboard_ssr")
+	dashboardSsrCollection := db.GetCollection("lookup_process1")
 	processesCollection := db.GetCollection("processes")
 
 	var existingProcess bson.M

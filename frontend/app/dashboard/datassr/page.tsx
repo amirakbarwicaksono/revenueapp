@@ -226,6 +226,8 @@ export default function DataSSRPage() {
     }
   };
 
+  const isExportDisabled = !filters.issuedDate || !filters.country;
+
   const totalPages = Math.ceil(totalDocs / pageSize);
   const pageNumbers = [];
   for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
@@ -269,19 +271,6 @@ export default function DataSSRPage() {
                 </option>
               ))}
             </select>
-            {/* <select
-              name="airline"
-              value={filters.airline}
-              onChange={handleFilterChange}
-              className="px-3 py-1.5 text-xs sm:text-sm border rounded w-full sm:w-auto"
-            >
-              <option value="">All Airlines</option>
-              {filterOptions.airlines.map((airline) => (
-                <option key={airline} value={airline}>
-                  {airline}
-                </option>
-              ))}
-            </select> */}
             <div className="relative w-full sm:w-64">
               <input
                 type="text"
@@ -302,7 +291,10 @@ export default function DataSSRPage() {
             </div>
             <button
               onClick={handleExport}
-              className="px-3 py-1.5 text-xs sm:text-sm font-semibold text-gray-100 bg-green-600 hover:bg-green-700 rounded w-full sm:w-auto"
+              disabled={isExportDisabled}
+              className={`px-3 py-1.5 text-xs sm:text-sm font-semibold text-gray-100 bg-green-600 hover:bg-green-700 rounded w-full sm:w-auto ${
+                isExportDisabled ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               <FaFileDownload className="inline mr-1 h-4 w-4" /> Export
             </button>
