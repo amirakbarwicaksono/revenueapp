@@ -100,7 +100,8 @@ revenueapp/
      use revenueapp
      db.dashboard_ssr.createIndex({ "PNRR": 1 });
      db.dashboard_ssr.createIndex({ "TicketNumber": 1 });
-     incase you need to understand all indexed that needed in database. try to download and restore thedatabase.
+     incase you need to understand all indexed that needed in database. 
+     try to download and restore database.
      ```
 
 4. **Install Go Dependencies**:
