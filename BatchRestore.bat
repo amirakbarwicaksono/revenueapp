@@ -32,7 +32,7 @@ if not exist "%backupDir%\%selectedBackup%" (
 
 REM Jalankan mongorestore
 echo Memulai proses restore dari folder: %backupDir%\%selectedBackup%
-mongorestore --db=lionb "%backupDir%\%selectedBackup%\liond"
+"C:\Program Files\MongoDB\Tools\100\bin\mongorestore.exe" --db=lionb "%backupDir%\%selectedBackup%\liond"
 
 REM Pesan berhasil
 echo Restore completed successfully!

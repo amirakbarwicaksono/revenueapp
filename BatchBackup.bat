@@ -11,7 +11,7 @@ if not exist "D:\mongodb-backuprv" (
 
 REM Backup MongoDB dengan timestamp
 set timestamp=%date:~10,4%-%date:~4,2%-%date:~7,2%
-mongodump --db=liond --out="D:\mongodb-backuprv\%timestamp%"
+"C:\Program Files\MongoDB\Tools\100\bin\mongodump.exe" --db=liond --out="D:\mongodb-backuprv\%timestamp%"
 
 REM Pesan berhasil
 echo Backup completed successfully!
