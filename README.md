@@ -7,6 +7,7 @@ A full-stack web application for airline ticket data management, built with Next
 ```
 revenueapp/
 ├── backend/
+│   ├── .env
 │   ├── main.go
 │   ├── db/
 │   │   └── mongo.go
@@ -24,7 +25,7 @@ revenueapp/
 │   │   ├── dashboard_ssr.go
 │   │   └── ...
 │   └── routes/
-│       └── ...
+│       └── Api.go
 ├── frontend/
 │   ├── app/
 │   │   ├── upload/page.tsx
@@ -99,6 +100,7 @@ revenueapp/
      use revenueapp
      db.dashboard_ssr.createIndex({ "PNRR": 1 });
      db.dashboard_ssr.createIndex({ "TicketNumber": 1 });
+     incase you need to understand all indexed that needed in database. try to download and restore thedatabase.
      ```
 
 4. **Install Go Dependencies**:
