@@ -73,7 +73,7 @@ useEffect(() => {
                 <div className="hidden md:flex space-x-4">
                         {storedUsername && (
                             <div className="hover:text-gray-600 animate-bounce font-bold">
-                                Howdy, {storedUsername === "admin" ? "DA Team?" : storedUsername === "nizar" ? "Nizar?" : storedUsername === "yerrisa" ? "Yerrisa?" : storedUsername  === "ryan" ? "Ryan?" : storedUsername === "christin" ? "Christin?" : storedUsername === "aurel" ? "Aurel?" : storedUsername  === "lingga" ? "Lingga?" : storedUsername === "alief" ? "Alief?" : storedUsername }
+                                Howdy, {storedUsername === "admin" ? "DA Team?" : storedUsername === "nizar" ? "Nizar?" : storedUsername === "fadhil" ? "Fadhil?" : storedUsername  === "vincent" ? "Vincent?" : storedUsername === "christin" ? "Christin?" : storedUsername === "aurel" ? "Aurel?" : storedUsername  === "lingga" ? "Lingga?" : storedUsername === "alief" ? "Alief?" : storedUsername }
                             </div>
                         )}	 	
                     <Link href="/" className="hover:text-gray-600 font-bold">
