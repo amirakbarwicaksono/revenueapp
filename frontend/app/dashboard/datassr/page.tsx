@@ -81,6 +81,7 @@ export default function DataSSRPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
   const pageSize = 10;
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -189,6 +190,10 @@ export default function DataSSRPage() {
   };
 
   const handleExport = async () => {
+    if (!filters.issuedDate || !filters.country) {
+      setShowPopup(true);
+      return;
+    }
     if (!apiUrl) {
       setError("API URL is not configured.");
       return;
@@ -226,7 +231,9 @@ export default function DataSSRPage() {
     }
   };
 
-  const isExportDisabled = !filters.issuedDate || !filters.country;
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
 
   const totalPages = Math.ceil(totalDocs / pageSize);
   const pageNumbers = [];
@@ -291,14 +298,31 @@ export default function DataSSRPage() {
             </div>
             <button
               onClick={handleExport}
-              disabled={isExportDisabled}
-              className={`px-3 py-1.5 text-xs sm:text-sm font-semibold text-gray-100 bg-green-600 hover:bg-green-700 rounded w-full sm:w-auto ${
-                isExportDisabled ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className="px-3 py-1.5 text-xs sm:text-sm font-semibold text-gray-100 bg-green-600 hover:bg-green-700 rounded w-full sm:w-auto"
             >
               <FaFileDownload className="inline mr-1 h-4 w-4" /> Export
             </button>
           </div>
+
+          {showPopup && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-3 rounded-md shadow-md max-w-xs w-full">
+                <h2 className="text-base font-semibold mb-2">Export Unavailable</h2>
+                <p className="text-xs mb-3">
+                  Please select both Date and Country to use the Export feature.
+                </p>
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleClosePopup}
+                    className="text-xs px-3 py-1.5 bg-secondary text-white rounded hover:bg-gray-600"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
 
           {error && <p className="text-red-500 text-xs sm:text-sm mb-4">{error}</p>}
 
