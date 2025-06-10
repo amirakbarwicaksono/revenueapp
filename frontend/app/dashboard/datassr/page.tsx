@@ -285,7 +285,7 @@ export default function DataSSRPage() {
               onChange={handleFilterChange}
               className="px-3 py-1.5 text-xs sm:text-sm border rounded w-full sm:w-auto"
             >
-              <option value="">Airlines Code</option>
+              <option value="">All Airlines</option>
               {filterOptions.airlines.map((airline) => (
                 <option key={airline} value={airline}>
                   {airline}
