@@ -77,7 +77,7 @@ func UploadData(c *gin.Context) {
 	// Create context with timeout
 	timeoutDuration := 30 * time.Minute
 	if collectionName == "dataFmr" {
-		timeoutDuration = 35 * time.Minute // Longer timeout for dataFmr
+		timeoutDuration = 45 * time.Minute // Longer timeout for dataFmr
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
 	defer cancel()
@@ -109,8 +109,9 @@ func UploadData(c *gin.Context) {
 		batchSize = 50 // Smaller batch size for dataFmr
 	}
 	var batch []interface{}
-	seenRecords := make(map[string]struct{})
+	seenRecords := make(map[string]struct{}, batchSize) // Pre-allocate map
 	var totalInserted, csvTotalCount, duplicateCount int
+	batchCounter := 0
 
 	for {
 		record, err := reader.Read()
@@ -147,10 +148,15 @@ func UploadData(c *gin.Context) {
 				respondWithJSONError(c, http.StatusInternalServerError, "Failed to process batch: "+err.Error())
 				return
 			}
-			log.Printf("Processed batch of %d records for collection %s in %v", len(batch), collectionName, time.Since(startTime))
+			log.Printf("Processed batch %d of %d records for collection %s in %v", batchCounter+1, len(batch), collectionName, time.Since(startTime))
+			runtime.ReadMemStats(&memStats)
+			log.Printf("Memory after batch %d - Alloc: %v, TotalAlloc: %v, Sys: %v", batchCounter+1, memStats.Alloc, memStats.TotalAlloc, memStats.Sys)
 			batch = nil
-			seenRecords = make(map[string]struct{})
-			runtime.GC()
+			seenRecords = make(map[string]struct{}, batchSize)
+			batchCounter++
+			if batchCounter%10 == 0 {
+				runtime.GC() // Force GC every 10 batches
+			}
 		}
 	}
 
@@ -164,6 +170,8 @@ func UploadData(c *gin.Context) {
 			return
 		}
 		log.Printf("Processed final batch of %d records in %v", len(batch), time.Since(startTime))
+		runtime.ReadMemStats(&memStats)
+		log.Printf("Memory after final batch - Alloc: %v, TotalAlloc: %v, Sys: %v", memStats.Alloc, memStats.TotalAlloc, memStats.Sys)
 	}
 
 	// Fetch after count
@@ -291,7 +299,6 @@ func processBatch(ctx context.Context, collection *mongo.Collection, collectionN
 		*totalInserted += int(res.UpsertedCount) + int(res.ModifiedCount)
 		log.Printf("Bulk write result - Matched: %d, Modified: %d, Upserted: %d in %s", res.MatchedCount, res.ModifiedCount, res.UpsertedCount, collectionName)
 	}
-	runtime.GC()
 	return nil
 }
 
