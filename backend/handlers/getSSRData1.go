@@ -86,7 +86,7 @@ func GetSSRData1(c *gin.Context) {
 		filter["country"] = bson.M{"$regex": country, "$options": "i"} // Case-insensitive
 	}
 	if airline != "" {
-		filter["StationCode"] = bson.M{"$regex": airline, "$options": "i"} // Case-insensitive
+		filter["Airlines"] = bson.M{"$regex": airline, "$options": "i"} // Case-insensitive
 	}
 	if searchTerm != "" {
 		filter["$or"] = []bson.M{

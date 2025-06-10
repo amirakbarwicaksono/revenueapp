@@ -55,4 +55,5 @@ type DataFmr struct {
 	CalcTotal        float64   `bson:"CalcTotal"`        // Total calculated amount (e.g., 108.00)
 	exbprasdesc      string    `bson:"exbprasdesc"`      // Extra fare description (if applicable)
 	country          string    `bson:"country"`          // Country name (e.g., "MALAYSIA")
+	Airlines          string    `bson:"Airlines"`          // Airline name (e.g., "OD")
 }

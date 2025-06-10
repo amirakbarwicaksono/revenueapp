@@ -151,7 +151,7 @@ func ExportCSV1(c *gin.Context) {
 		"code1", "code2", "code3", "code4",
 		"EMDRemark1", "EMDRemark2", "EMDRemark3", "EMDRemark4",
 		"TktBaseFare", "TktPPN", "D8", "T6", "TktFSurcharge", "YR",
-		"tktadm", "TktApoTax", "CalcTotal", "exbprasdesc", "country",
+		"tktadm", "TktApoTax", "CalcTotal", "exbprasdesc", "country", "Airlines",
 	}
 
 	writer := csv.NewWriter(c.Writer)
@@ -260,6 +260,7 @@ func ExportCSV1(c *gin.Context) {
 				formatNumber(doc["CalcTotal"]),
 				toString(doc["exbprasdesc"]),
 				toString(doc["country"]),
+				toString(doc["Airlines"]),
 			}
 
 			if err := writer.Write(row); err != nil {

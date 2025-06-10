@@ -14,6 +14,7 @@ interface FilterOptionsResponse {
 }
 
 interface SSRData {
+  Airlines: string;
   StationOpenDate: string;
   StationCloseDate: string;
   StationNo: string;
@@ -278,6 +279,20 @@ export default function DataSSRPage() {
                 </option>
               ))}
             </select>
+            <select
+              name="airline"
+              value={filters.airline}
+              onChange={handleFilterChange}
+              className="px-3 py-1.5 text-xs sm:text-sm border rounded w-full sm:w-auto"
+            >
+              <option value="">Airlines Code</option>
+              {filterOptions.airlines.map((airline) => (
+                <option key={airline} value={airline}>
+                  {airline}
+                </option>
+              ))}
+            </select>
+
             <div className="relative w-full sm:w-64">
               <input
                 type="text"
@@ -331,6 +346,7 @@ export default function DataSSRPage() {
             <table className="min-w-full bg-white border text-xs sm:text-sm hidden sm:table">
               <thead>
                 <tr className="bg-secondary text-gray-100">
+                  <th className="py-2 px-4 border-b">Airlines</th>
                   <th className="py-2 px-4 border-b">StationOpenDate</th>
                   <th className="py-2 px-4 border-b">StationCloseDate</th>
                   <th className="py-2 px-4 border-b">StationNo</th>
@@ -396,6 +412,7 @@ export default function DataSSRPage() {
                 ) : (
                   data.map((item, index) => (
                     <tr key={item.TicketNumber || `row-${index}`} className="hover:bg-gray-50">
+                      <td className="py-2 px-4 border-b">{item.Airlines || ""}</td>
                       <td className="py-2 px-4 border-b">{item.StationOpenDate || ""}</td>
                       <td className="py-2 px-4 border-b">{item.StationCloseDate || ""}</td>
                       <td className="py-2 px-4 border-b">{item.StationNo || ""}</td>
@@ -462,6 +479,7 @@ export default function DataSSRPage() {
                     className="border rounded-lg p-4 bg-white shadow-sm"
                   >
                     <div className="grid grid-cols-1 gap-2 text-xs">
+                      <div><strong>Airlines:</strong> {item.Airlines || ""}</div>
                       <div><strong>Ticket Number:</strong> {item.TicketNumber || ""}</div>
                       <div><strong>PNRR:</strong> {item.PNRR || ""}</div>
                       <div><strong>Pax Name:</strong> {item.PaxName || ""}</div>

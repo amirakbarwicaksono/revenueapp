@@ -173,6 +173,8 @@ func LookupAndSave1(c *gin.Context) {
 				{Key: "CalcTotal", Value: "$CalcTotal"},
 				{Key: "exbprasdesc", Value: "$exbprasdesc"},
 				{Key: "country", Value: "$country"},
+				{Key: "Airlines", Value: "$Airlines"},
+				// Additional fields for lookup_process1
 				{Key: "IssuedDate", Value: "$IssuedDate"},
 				{Key: "RefundTicket", Value: "$RefundTicket"},
 				{Key: "exchTicket", Value: "$exchTicket"},
@@ -277,9 +279,11 @@ func LookupAndSave1(c *gin.Context) {
 						"IssuedDate":       "$$ROOT.IssuedDate",
 						"exbprasdesc":      "$$ROOT.exbprasdesc",
 						"country":          "$$ROOT.country",
-						"TktInd":           "$$ROOT.TktInd",
-						"CCNo":             "$$ROOT.CCNo",
-						"ApprovalCode":     "$$ROOT.ApprovalCode",
+						"Airlines":         "$$ROOT.Airlines",
+						// Additional fields for dashboard_ssr
+						"TktInd":       "$$ROOT.TktInd",
+						"CCNo":         "$$ROOT.CCNo",
+						"ApprovalCode": "$$ROOT.ApprovalCode",
 					}}},
 				}},
 				{Key: "whenNotMatched", Value: "insert"},
@@ -328,3 +332,5 @@ func sendSSE(c *gin.Context, requestID string, message string) {
 	}
 	c.Writer.Flush()
 }
+
+//1:1

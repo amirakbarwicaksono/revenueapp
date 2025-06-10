@@ -125,7 +125,6 @@
 // 	return false
 // }
 
-
 package handlers
 
 import (
@@ -216,7 +215,7 @@ func GetSSRFilterOptions(c *gin.Context) {
 	}
 
 	// Fetch unique airlines (stationcode)
-	airlines, err := dashboardSsrCollection.Distinct(ctx, "StationCode", bson.M{})
+	airlines, err := dashboardSsrCollection.Distinct(ctx, "Airlines", bson.M{})
 	if err != nil {
 		log.Printf("Error fetching airlines: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch airlines"})

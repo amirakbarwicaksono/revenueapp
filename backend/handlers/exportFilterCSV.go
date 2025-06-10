@@ -69,7 +69,7 @@ func ExportFilteredCSV(c *gin.Context) {
 		filter["country"] = bson.M{"$regex": country, "$options": "i"} // Case-insensitive
 	}
 	if airline != "" {
-		filter["StationCode"] = bson.M{"$regex": airline, "$options": "i"} // Case-insensitive
+		filter["Airlines"] = bson.M{"$regex": airline, "$options": "i"} // Case-insensitive
 	}
 	if searchTerm != "" {
 		filter["$or"] = []bson.M{
@@ -125,7 +125,7 @@ func ExportFilteredCSV(c *gin.Context) {
 		"code1", "code2", "code3", "code4",
 		"EMDRemark1", "EMDRemark2", "EMDRemark3", "EMDRemark4",
 		"TktBaseFare", "TktPPN", "D8", "T6", "TktFSurcharge", "YR",
-		"tktadm", "TktApoTax", "CalcTotal", "exbprasdesc", "country",
+		"tktadm", "TktApoTax", "CalcTotal", "exbprasdesc", "country", "Airlines",
 	}
 	if err := writer.Write(headers); err != nil {
 		log.Printf("[%s] Failed to write CSV headers: %v", requestID, err)
@@ -208,6 +208,7 @@ func ExportFilteredCSV(c *gin.Context) {
 				safeString(formatNumber(doc["CalcTotal"])),
 				safeString(toString(doc["exbprasdesc"])),
 				safeString(toString(doc["country"])),
+				safeString(toString(doc["Airlines"])), // Ensure Airlines field is included
 			}
 			if err := writer.Write(row); err != nil {
 				log.Printf("[%s] Failed to write CSV row: %v", requestID, err)
