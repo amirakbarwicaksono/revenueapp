@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -259,15 +260,61 @@ func processBatch(ctx context.Context, collection *mongo.Collection, collectionN
 		}
 		*totalInserted += int(res.UpsertedCount) + int(res.ModifiedCount)
 		log.Printf("Bulk write result - Matched: %d, Modified: %d, Upserted: %d in %s", res.MatchedCount, res.ModifiedCount, res.UpsertedCount, collectionName)
+		// } else if collectionName == "dataFmr" {
+		// 	var bulkOps []mongo.WriteModel
+		// 	for _, record := range batch {
+		// 		doc := record.(map[string]interface{})
+		// 		f := bson.M{
+		// 			"StationNo":    doc["StationNo"],
+		// 			"StationCode":  doc["StationCode"],
+		// 			"StationCurr":  doc["StationCurr"],
+		// 			"TicketNumber": doc["TicketNumber"],
+		// 			"PaxName":      doc["PaxName"],
+		// 			"PNRR":         doc["PNRR"],
+		// 			"AgentDie":     doc["AgentDie"],
+		// 			"TourCode":     doc["TourCode"],
+		// 			"FOP":          doc["FOP"],
+		// 		}
+		// 		u := bson.M{"$set": doc}
+		// 		bulkOps = append(bulkOps, mongo.NewUpdateOneModel().SetFilter(f).SetUpdate(u).SetUpsert(true))
+		// 	}
+		// 	res, err := collection.BulkWrite(ctx, bulkOps, options.BulkWrite().SetOrdered(false))
+		// 	if err != nil {
+		// 		return fmt.Errorf("failed to bulk write: %v", err)
+		// 	}
+		// 	*totalInserted += int(res.UpsertedCount) + int(res.ModifiedCount)
+		// 	log.Printf("Bulk write result - Matched: %d, Modified: %d, Upserted: %d in %s", res.MatchedCount, res.ModifiedCount, res.UpsertedCount, collectionName)
 	} else if collectionName == "dataFmr" {
 		var bulkOps []mongo.WriteModel
 		for _, record := range batch {
 			doc := record.(map[string]interface{})
+
+			// Convert TicketNumber to int64
+			ticketNumberStr, ok := doc["TicketNumber"].(string)
+			if !ok {
+				return fmt.Errorf("TicketNumber is not a string: %v", doc["TicketNumber"])
+			}
+
+			// Handle scientific notation
+			ticketNumberFloat, err := strconv.ParseFloat(ticketNumberStr, 64)
+			if err != nil {
+				return fmt.Errorf("failed to parse TicketNumber '%s': %v", ticketNumberStr, err)
+			}
+
+			// Convert to int64
+			ticketNumber := int64(ticketNumberFloat)
+			if ticketNumber <= 0 {
+				return fmt.Errorf("invalid TicketNumber '%s': must be a positive integer", ticketNumberStr)
+			}
+
+			// Update doc with converted TicketNumber
+			doc["TicketNumber"] = ticketNumber
+
 			f := bson.M{
 				"StationNo":    doc["StationNo"],
 				"StationCode":  doc["StationCode"],
 				"StationCurr":  doc["StationCurr"],
-				"TicketNumber": doc["TicketNumber"],
+				"TicketNumber": ticketNumber, // Use converted int64
 				"PaxName":      doc["PaxName"],
 				"PNRR":         doc["PNRR"],
 				"AgentDie":     doc["AgentDie"],
