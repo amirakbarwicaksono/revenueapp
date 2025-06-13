@@ -192,7 +192,14 @@ func LookupAndSave(c *gin.Context) {
 		{{Key: "$set", Value: bson.M{
 			"fareupdate": bson.M{
 				"$cond": bson.M{
-					"if":   bson.M{"$eq": []interface{}{"$transcode", "EXCH"}},
+					"if": bson.M{
+						"$and": []interface{}{
+							bson.M{"$eq": []interface{}{"$transcode", "EXCH"}},
+							bson.M{"$ne": []interface{}{"$OriginalFareUpdate", nil}},
+							bson.M{"$ne": []interface{}{"$OriginalFareUpdate", ""}}, //added check for empty string (req 13/06/2025)
+							bson.M{"$ne": []interface{}{"$OriginalFareUpdate", 0}},  //blank or 0.
+						},
+					},
 					"then": "$OriginalFareUpdate",
 					"else": "$fareupdate",
 				},
@@ -323,6 +330,7 @@ func LookupAndSave(c *gin.Context) {
 		matchCondition,
 		{{Key: "$match", Value: bson.M{
 			"transcode": bson.M{"$exists": true},
+			"Channel":   "WEB", // Only count documents with Channel: WEB
 		}}},
 		{{Key: "$set", Value: bson.M{
 			"fareupdate": bson.M{
@@ -431,6 +439,7 @@ func LookupAndSave(c *gin.Context) {
 				"airlines":      "$airlines",
 				"flightnumber":  "$Flightnumber",
 				"airlinesTkt":   "$AirlinesTKT",
+				"flownDate":     "$flowndate",
 			}},
 			{Key: "pipeline", Value: mongo.Pipeline{
 				{{Key: "$match", Value: bson.M{
@@ -446,6 +455,7 @@ func LookupAndSave(c *gin.Context) {
 							bson.D{{Key: "$eq", Value: bson.A{"$airlines", "$$airlines"}}},
 							bson.D{{Key: "$eq", Value: bson.A{"$Flightnumber", "$$flightnumber"}}},
 							bson.D{{Key: "$eq", Value: bson.A{"$AirlinesTKT", "$$airlinesTkt"}}},
+							bson.D{{Key: "$eq", Value: bson.A{"$flowndate", "$$flownDate"}}},
 						},
 					},
 				}}},

@@ -1263,13 +1263,12 @@
 // 	}
 // }
 
-// func respondWithJSONError(c *gin.Context, statusCode int, message string) {
-// 	c.JSON(statusCode, gin.H{
-// 		"error":   message,
-// 		"message": message,
-// 	})
-// }
-
+//	func respondWithJSONError(c *gin.Context, statusCode int, message string) {
+//		c.JSON(statusCode, gin.H{
+//			"error":   message,
+//			"message": message,
+//		})
+//	}
 package handlers
 
 import (
@@ -1354,20 +1353,24 @@ func UploadData(c *gin.Context) {
 	var ticketNumberIndex int
 	var csvTotalCount, duplicateCount int
 
-	if collectionName == "dataFmr" {
+	if collectionName == "dataFmr" || collectionName == "dataFpr" {
 		ticketNumberRegex := regexp.MustCompile(`^[0-9]{13}$`)
 		seenRecords = make(map[string]struct{}, 1000) // For entire CSV
 		rowNum := 1                                   // Header is row 1, data starts at row 2
 
-		// Find TicketNumber index
+		// Find ticketnumber index
+		ticketHeader := "TicketNumber"
+		if collectionName == "dataFpr" {
+			ticketHeader = "ticketnumber"
+		}
 		for i, header := range csvHeaders {
-			if header == "TicketNumber" {
+			if header == ticketHeader {
 				ticketNumberIndex = i
 				break
 			}
 		}
 
-		// Pre-validate TicketNumber and count duplicates
+		// Pre-validate ticketnumber and count duplicates
 		file.Seek(0, 0)
 		reader = csv.NewReader(file)
 		_, err := reader.Read() // Skip headers
@@ -1388,20 +1391,25 @@ func UploadData(c *gin.Context) {
 			rowNum++
 			csvTotalCount++
 
-			// Validate TicketNumber
+			// Validate ticketnumber
 			ticketNumber := TrimSpacesAndRemoveChar160(record[ticketNumberIndex])
 			if !ticketNumberRegex.MatchString(ticketNumber) {
-				errMsg := fmt.Sprintf("Upload failed: TicketNumber '%s' in row %d is not 13 digits", ticketNumber, rowNum)
+				errMsg := fmt.Sprintf("Upload failed: %s '%s' in row %d is not 13 digits", ticketHeader, ticketNumber, rowNum)
 				log.Printf("Validation failed for collection %s: %s", collectionName, errMsg)
 				respondWithJSONError(c, http.StatusBadRequest, errMsg)
 				return
 			}
 
 			// Count duplicates
-			uniqueKey := generateDataFmrUniqueKey(record, csvHeaders)
+			var uniqueKey string
+			if collectionName == "dataFmr" {
+				uniqueKey = generateDataFmrUniqueKey(record, csvHeaders)
+			} else {
+				uniqueKey = generateDataFprUniqueKey(record, csvHeaders)
+			}
 			if _, exists := seenRecords[uniqueKey]; exists {
 				duplicateCount++
-				log.Printf("Duplicate detected in collection %s, row %d: %s", collectionName, rowNum, uniqueKey)
+				log.Printf("Duplicate detected duplicate detected in %s: row %d: %s", collectionName, rowNum, uniqueKey)
 			}
 			seenRecords[uniqueKey] = struct{}{}
 		}
@@ -1420,7 +1428,7 @@ func UploadData(c *gin.Context) {
 
 	// Create context with timeout
 	timeoutDuration := 30 * time.Minute
-	if collectionName == "dataFmr" {
+	if collectionName == "dataFmr" || collectionName == "dataFpr" {
 		timeoutDuration = 45 * time.Minute
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
@@ -1449,7 +1457,7 @@ func UploadData(c *gin.Context) {
 
 	// Process CSV records
 	batchSize := 100
-	if collectionName == "dataFmr" {
+	if collectionName == "dataFmr" || collectionName == "dataFpr" {
 		batchSize = 50
 	}
 	var batch []interface{}
@@ -1466,7 +1474,7 @@ func UploadData(c *gin.Context) {
 			return
 		}
 
-		if collectionName != "dataFmr" {
+		if collectionName != "dataFmr" && collectionName != "dataFpr" {
 			csvTotalCount++
 			// Use a proper row map for GenerateUniqueKey
 			row := make(map[string]interface{})
@@ -1502,7 +1510,7 @@ func UploadData(c *gin.Context) {
 			runtime.ReadMemStats(&memStats)
 			log.Printf("Memory after batch %d - Alloc: %v, TotalAlloc: %v, Sys: %v", batchCounter+1, memStats.Alloc, memStats.TotalAlloc, memStats.Sys)
 			batch = nil
-			if collectionName != "dataFmr" {
+			if collectionName != "dataFmr" && collectionName != "dataFpr" {
 				seenRecords = make(map[string]struct{}, batchSize)
 			}
 			batchCounter++
@@ -1553,21 +1561,89 @@ func UploadData(c *gin.Context) {
 	})
 }
 
-// generateDataFmrUniqueKey generates a unique key for dataFmr rows
 func generateDataFmrUniqueKey(record []string, headers []string) string {
-	var ticketNumber, stationNo, stationCode, paxName string
+	var stationNo, stationCode, stationCurr, ticketNumber, paxName, pnrr, agentDie, tourCode, fop string
+
 	for i, header := range headers {
-		if header == "TicketNumber" {
-			ticketNumber = TrimSpacesAndRemoveChar160(record[i])
-		} else if header == "StationNo" {
+		switch header {
+		case "StationNo":
 			stationNo = TrimSpacesAndRemoveChar160(record[i])
-		} else if header == "StationCode" {
+		case "StationCode":
 			stationCode = TrimSpacesAndRemoveChar160(record[i])
-		} else if header == "PaxName" {
+		case "StationCurr":
+			stationCurr = TrimSpacesAndRemoveChar160(record[i])
+		case "TicketNumber":
+			ticketNumber = TrimSpacesAndRemoveChar160(record[i])
+		case "PaxName":
 			paxName = TrimSpacesAndRemoveChar160(record[i])
+		case "PNRR":
+			pnrr = TrimSpacesAndRemoveChar160(record[i])
+		case "AgentDie":
+			agentDie = TrimSpacesAndRemoveChar160(record[i])
+		case "TourCode":
+			tourCode = TrimSpacesAndRemoveChar160(record[i])
+		case "FOP":
+			fop = TrimSpacesAndRemoveChar160(record[i])
 		}
 	}
-	return strings.Join([]string{ticketNumber, stationNo, stationCode, paxName}, "|")
+
+	return strings.Join([]string{
+		stationNo,
+		stationCode,
+		stationCurr,
+		ticketNumber,
+		paxName,
+		pnrr,
+		agentDie,
+		tourCode,
+		fop,
+	}, "|")
+}
+
+func generateDataFprUniqueKey(record []string, headers []string) string {
+	var ticketNumber, partitionCode, cityCode, paxName string
+	var routeAwal, routeAkhir, dateOfFlight, airlines, flightNumber, airlinesTkt, flownDate string
+
+	for i, header := range headers {
+		switch header {
+		case "ticketnumber":
+			ticketNumber = TrimSpacesAndRemoveChar160(record[i])
+		case "PartitionCode":
+			partitionCode = TrimSpacesAndRemoveChar160(record[i])
+		case "city_code":
+			cityCode = TrimSpacesAndRemoveChar160(record[i])
+		case "Paxname":
+			paxName = TrimSpacesAndRemoveChar160(record[i])
+		case "routeawal":
+			routeAwal = TrimSpacesAndRemoveChar160(record[i])
+		case "routeakhir":
+			routeAkhir = TrimSpacesAndRemoveChar160(record[i])
+		case "dateofflight":
+			dateOfFlight = TrimSpacesAndRemoveChar160(record[i])
+		case "airlines":
+			airlines = TrimSpacesAndRemoveChar160(record[i])
+		case "Flightnumber":
+			flightNumber = TrimSpacesAndRemoveChar160(record[i])
+		case "AirlinesTKT":
+			airlinesTkt = TrimSpacesAndRemoveChar160(record[i])
+		case "flowndate":
+			flownDate = TrimSpacesAndRemoveChar160(record[i])
+		}
+	}
+
+	return strings.Join([]string{
+		ticketNumber,
+		partitionCode,
+		cityCode,
+		paxName,
+		routeAwal,
+		routeAkhir,
+		dateOfFlight,
+		airlines,
+		flightNumber,
+		airlinesTkt,
+		flownDate,
+	}, "|")
 }
 
 func processBatch(ctx context.Context, collection *mongo.Collection, collectionName string, batch []interface{}, totalInserted *int64) error {
@@ -1586,8 +1662,20 @@ func processBatch(ctx context.Context, collection *mongo.Collection, collectionN
 		var bulkOps []mongo.WriteModel
 		for _, record := range batch {
 			doc := record.(map[string]interface{})
+
+			// Convert ticketnumber to int64
+			ticketNumberStr, ok := doc["ticketnumber"].(string)
+			if !ok {
+				return fmt.Errorf("ticketnumber is not a string: %v", doc["ticketnumber"])
+			}
+			ticketNumber, err := strconv.ParseInt(ticketNumberStr, 10, 64)
+			if err != nil {
+				return fmt.Errorf("failed to parse ticketnumber '%s': %v", ticketNumberStr, err)
+			}
+			doc["ticketnumber"] = ticketNumber
+
 			f := bson.M{
-				"ticketnumber":  doc["ticketnumber"],
+				"ticketnumber":  ticketNumber,
 				"PartitionCode": doc["PartitionCode"],
 				"city_code":     doc["city_code"],
 				"Paxname":       doc["Paxname"],
@@ -1597,6 +1685,7 @@ func processBatch(ctx context.Context, collection *mongo.Collection, collectionN
 				"airlines":      doc["airlines"],
 				"Flightnumber":  doc["Flightnumber"],
 				"airlinestkt":   doc["airlinestkt"],
+				"flowndate":     doc["flowndate"],
 			}
 			u := bson.M{"$set": doc}
 			bulkOps = append(bulkOps, mongo.NewUpdateOneModel().SetFilter(f).SetUpdate(u).SetUpsert(true))
@@ -1713,7 +1802,7 @@ func insertUploadLog(collectionName string, csvTotalCount int, recordCount int64
 	logEntry := models.UploadLog{
 		CollectionName: collectionName,
 		CSVTotalCount:  csvTotalCount,
-		RecordCount:    int(recordCount), // Convert int64 to int
+		RecordCount:    int(recordCount),
 		UploadedAt:     time.Now(),
 		Status:         status,
 		ErrorMessage:   errorMessage,
