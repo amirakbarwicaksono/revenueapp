@@ -16,7 +16,7 @@ import (
 )
 
 func GetSSRData1(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Second)
 	defer cancel()
 
 	// Parse query parameters
