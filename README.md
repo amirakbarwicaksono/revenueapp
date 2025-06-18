@@ -54,7 +54,9 @@ revenueapp/
 - **Frontend (Next.js)**:
   - Responsive UI with Tailwind CSS for desktop, tablet, and mobile.
   - SSR data dashboard (`DataSSRPage.tsx`) with filtering (by issued date, country), searching (PNRR, Ticket Number), and CSV export.
+  - ORC data dashboard (`DataORCPage.tsx`) with filtering (by 5 parameter), export CSV rate commision, and export CSV detail.
   - CSV upload interface (`upload/page.tsx`) for data ingestion.
+  - Personal User Dashboard For Finding Trend inside the database.
   - Role-based authentication with protected routes (`ProtectedRoute.tsx`, `SubpageGuard.tsx`).
 - **Backend (Go, Gin, MongoDB)**:
   - REST API with endpoints for data retrieval (`/getSSRData1`), filter options (`/getSSRFilterOptions`), and CSV export (`/exportFilteredCSV`).
