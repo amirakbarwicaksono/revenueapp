@@ -1354,9 +1354,9 @@ func UploadData(c *gin.Context) {
 	var csvTotalCount, duplicateCount int
 
 	if collectionName == "dataFmr" || collectionName == "dataFpr" {
-		ticketNumberRegex := regexp.MustCompile(`^[0-9]{13}$`)
-		seenRecords = make(map[string]struct{}, 1000) // For entire CSV
-		rowNum := 1                                   // Header is row 1, data starts at row 2
+		ticketNumberRegex := regexp.MustCompile(`^[0-9]{12,13}$`) // Updated to allow 12 or 13 digits
+		seenRecords = make(map[string]struct{}, 1000)             // For entire CSV
+		rowNum := 1                                               // Header is row 1, data starts at row 2
 
 		// Find ticketnumber index
 		ticketHeader := "TicketNumber"
@@ -1394,7 +1394,7 @@ func UploadData(c *gin.Context) {
 			// Validate ticketnumber
 			ticketNumber := TrimSpacesAndRemoveChar160(record[ticketNumberIndex])
 			if !ticketNumberRegex.MatchString(ticketNumber) {
-				errMsg := fmt.Sprintf("Upload failed: %s '%s' in row %d is not 13 digits", ticketHeader, ticketNumber, rowNum)
+				errMsg := fmt.Sprintf("Upload failed: %s '%s' in row %d is not is not 12 or 13 digits", ticketHeader, ticketNumber, rowNum)
 				log.Printf("Validation failed for collection %s: %s", collectionName, errMsg)
 				respondWithJSONError(c, http.StatusBadRequest, errMsg)
 				return
